@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Libro de Notas</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2EEE3;
+    --paper-raised:#FAF7EF;
+    --ink:#1F2A44;
+    --ink-soft:#4A5570;
+    --line:#C9C2AE;
+    --line-soft:#DAD4C2;
+    --red:#A13D2B;
+    --red-soft:#F1E1DC;
+    --green:#3D6B4F;
+    --green-soft:#E1EAE3;
+    --gold:#B08D3E;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px);
+    background-size: 100% 2.1em;
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    font-variant-numeric: tabular-nums;
+    min-height:100vh;
+  }
+  h1,h2,h3, .serif{
+    font-family:'Libre Baskerville', serif;
+    font-weight:700;
+    letter-spacing:0.01em;
+  }
+
+  /* ---------- Shell / layout ---------- */
+  .shell{
+    display:flex;
+    min-height:100vh;
+  }
+  .cover{
+    padding: 2.4em 2em 2em 2.4em;
+    flex:1;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  header.title-block{
+    border-bottom: 3px double var(--ink);
+    padding-bottom: 1em;
+    margin-bottom: 1.4em;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap: 0.6em;
+  }
+  header.title-block h1{
+    font-size: 2em;
+    margin: 0;
+    line-height:1.1;
+  }
+  #institutoNombre{
+    font-family:'Work Sans', sans-serif;
+    font-size:0.95em;
+    color:var(--ink-soft);
+    border:none;
+    background:transparent;
+    border-bottom:1px dashed var(--line);
+    padding:0.15em 0.1em;
+    min-width: 220px;
+    font-weight:500;
+  }
+  #institutoNombre:focus{ outline:none; border-bottom-color:var(--ink); }
+  .fecha-hoy{ font-size:0.85em; color:var(--ink-soft); font-style:italic; }
+
+  /* Tabs styled like notebook divider tabs */
+  nav.tabs{
+    display:flex;
+    gap: 0.4em;
+    margin-bottom: 1.6em;
+    flex-wrap:wrap;
+  }
+  nav.tabs button{
+    font-family:'Libre Baskerville', serif;
+    font-size: 0.95em;
+    background: var(--line-soft);
+    border: 1px solid var(--line);
+    border-bottom: none;
+    color: var(--ink-soft);
+    padding: 0.55em 1.1em 0.5em;
+    cursor:pointer;
+    border-radius: 6px 6px 0 0;
+    position:relative;
+    top:1px;
+  }
+  nav.tabs button.active{
+    background: var(--paper-raised);
+    color: var(--ink);
+    border-color: var(--ink);
+    font-weight:700;
+  }
+  section.panel{
+    background: var(--paper-raised);
+    border: 1px solid var(--ink);
+    border-radius: 0 6px 6px 6px;
+    padding: 1.8em 1.8em 2em;
+    box-shadow: 3px 3px 0 rgba(31,42,68,0.06);
+  }
+  section.panel h2{
+    margin-top:0;
+    font-size:1.3em;
+    border-bottom: 1px solid var(--line);
+    padding-bottom:0.5em;
+    margin-bottom:1.1em;
+  }
+  .hidden{ display:none !important; }
+
+  /* ---------- Forms ---------- */
+  form.row-form{
+    display:flex;
+    gap:0.8em;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    margin-bottom:1.6em;
+    padding-bottom:1.4em;
+    border-bottom: 1px dashed var(--line);
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:0.3em;
+  }
+  .field label{
+    font-size:0.78em;
+    text-transform:none;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  input, select{
+    font-family:'Work Sans', sans-serif;
+    font-size:0.95em;
+    padding:0.5em 0.6em;
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color:var(--ink);
+    min-width: 140px;
+  }
+  input:focus, select:focus{
+    outline: 2px solid var(--gold);
+    outline-offset:1px;
+    border-color:var(--gold);
+  }
+  input[type="number"]{ min-width:90px; }
+  button{
+    font-family:'Work Sans', sans-serif;
+    cursor:pointer;
+  }
+  .btn{
+    background: var(--ink);
+    color: var(--paper-raised);
+    border:1px solid var(--ink);
+    padding:0.6em 1.2em;
+    border-radius: var(--radius);
+    font-weight:600;
+    font-size:0.9em;
+  }
+  .btn:hover{ background:#152038; }
+  .btn-outline{
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--ink);
+  }
+  .btn-outline:hover{ background: var(--line-soft); }
+  .btn-danger{
+    background:transparent;
+    border:1px solid var(--red);
+    color:var(--red);
+    padding:0.35em 0.7em;
+    font-size:0.82em;
+    border-radius:var(--radius);
+  }
+  .btn-danger:hover{ background:var(--red-soft); }
+  .btn-small{
+    padding:0.35em 0.7em;
+    font-size:0.82em;
+    border-radius:var(--radius);
+  }
+
+  /* ---------- Tables (ledger look) ---------- */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.92em;
+  }
+  thead th{
+    text-align:left;
+    font-family:'Libre Baskerville', serif;
+    font-weight:700;
+    font-size:0.88em;
+    color:var(--ink);
+    border-bottom: 2px solid var(--ink);
+    padding: 0.5em 0.6em;
+  }
+  tbody td{
+    padding: 0.55em 0.6em;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align:middle;
+  }
+  tbody tr:hover{ background: rgba(176,141,62,0.06); }
+  td.num, th.num{ text-align:right; }
+  .pill{
+    display:inline-block;
+    padding: 0.15em 0.6em;
+    border-radius: 20px;
+    font-size:0.8em;
+    font-weight:600;
+  }
+  .pill-pass{ background:var(--green-soft); color:var(--green); }
+  .pill-fail{ background:var(--red-soft); color:var(--red); }
+  .empty-state{
+    padding: 2.2em 1em;
+    text-align:center;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  .actions-cell{ display:flex; gap:0.4em; }
+
+  /* Reportes */
+  .reporte-cards{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px,1fr));
+    gap:1em;
+    margin-bottom:1.6em;
+  }
+  .stat-card{
+    border:1px solid var(--line);
+    background:var(--paper);
+    padding:1em 1.1em;
+    border-radius: var(--radius);
+  }
+  .stat-card .stat-num{
+    font-family:'Libre Baskerville', serif;
+    font-size:1.9em;
+    display:block;
+    line-height:1.1;
+  }
+  .stat-card .stat-label{
+    font-size:0.78em;
+    color:var(--ink-soft);
+  }
+  .stat-card.pass .stat-num{ color:var(--green); }
+  .stat-card.fail .stat-num{ color:var(--red); }
+
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1em;
+    flex-wrap:wrap;
+    margin-bottom:1.2em;
+  }
+  .search-box input{ min-width:220px; }
+
+  footer.book-footer{
+    margin-top: 2em;
+    padding-top:1em;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:0.8em;
+    font-size:0.82em;
+    color:var(--ink-soft);
+  }
+  footer.book-footer button{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    text-decoration:underline;
+    font-size:1em;
+    cursor:pointer;
+    padding:0;
+  }
+  #fileImport{ display:none; }
+
+  select#notaCombinada option.opt-fail{ color:var(--red); }
+
+  @media (max-width: 620px){
+    .cover{ padding: 1.4em 1em 1.6em; }
+    header.title-block h1{ font-size:1.5em; }
+    form.row-form{ flex-direction:column; align-items:stretch; }
+    input, select{ min-width:0; width:100%; }
+    table, thead, tbody, th, td, tr{ display:block; }
+    thead{ display:none; }
+    tbody tr{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      margin-bottom:0.8em;
+      padding:0.4em 0.6em;
+      background:var(--paper);
+    }
+    tbody td{
+      border-bottom:none;
+      display:flex;
+      justify-content:space-between;
+      gap:1em;
+      padding:0.35em 0;
+    }
+    tbody td::before{
+      content: attr(data-label);
+      font-weight:600;
+      color:var(--ink-soft);
+      font-size:0.8em;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="cover">
+
+    <header class="title-block">
+      <div>
+        <h1>📖 Libro de Notas</h1>
+        <input id="institutoNombre" type="text" placeholder="Nombre del instituto" aria-label="Nombre del instituto">
+      </div>
+      <div class="fecha-hoy" id="fechaHoy"></div>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <button data-panel="estudiantes" class="active">Estudiantes</button>
+      <button data-panel="materias">Materias</button>
+      <button data-panel="notas">Notas</button>
+      <button data-panel="reportes">Reportes</button>
+    </nav>
+
+    <!-- ESTUDIANTES -->
+    <section class="panel" id="panel-estudiantes">
+      <h2>Estudiantes</h2>
+      <form class="row-form" id="formEstudiante">
+        <div class="field">
+          <label for="estNombre">Nombre completo</label>
+          <input id="estNombre" type="text" required placeholder="Ej: Laura Gómez">
+        </div>
+        <div class="field">
+          <label for="estGrupo">Grupo / curso</label>
+          <input id="estGrupo" type="text" required placeholder="Ej: 10-A">
+        </div>
+        <button type="submit" class="btn">Agregar estudiante</button>
+      </form>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <input type="text" id="buscarEstudiante" placeholder="Buscar por nombre o grupo…">
+        </div>
+        <span id="conteoEstudiantes" style="font-size:0.85em;color:var(--ink-soft);"></span>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>Nombre</th><th>Grupo</th><th class="num">Promedio</th><th></th></tr>
+        </thead>
+        <tbody id="tablaEstudiantes"></tbody>
+      </table>
+    </section>
+
+    <!-- MATERIAS -->
+    <section class="panel hidden" id="panel-materias">
+      <h2>Materias</h2>
+      <form class="row-form" id="formMateria">
+        <div class="field">
+          <label for="matNombre">Nombre de la materia</label>
+          <input id="matNombre" type="text" required placeholder="Ej: Matemáticas">
+        </div>
+        <div class="field">
+          <label for="matDocente">Docente (opcional)</label>
+          <input id="matDocente" type="text" placeholder="Ej: Carlos Ruiz">
+        </div>
+        <button type="submit" class="btn">Agregar materia</button>
+      </form>
+
+      <table>
+        <thead>
+          <tr><th>Materia</th><th>Docente</th><th class="num">Promedio general</th><th></th></tr>
+        </thead>
+        <tbody id="tablaMaterias"></tbody>
+      </table>
+    </section>
+
+    <!-- NOTAS -->
+    <section class="panel hidden" id="panel-notas">
+      <h2>Registro de notas</h2>
+      <form class="row-form" id="formNota">
+        <div class="field">
+          <label for="notaEstudiante">Estudiante</label>
+          <select id="notaEstudiante" required></select>
+        </div>
+        <div class="field">
+          <label for="notaMateria">Materia</label>
+          <select id="notaMateria" required></select>
+        </div>
+        <div class="field">
+          <label for="notaPeriodo">Periodo</label>
+          <select id="notaPeriodo" required>
+            <option value="1">Periodo 1</option>
+            <option value="2">Periodo 2</option>
+            <option value="3">Periodo 3</option>
+            <option value="4">Periodo 4</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="notaValor">Nota (1.0–5.0)</label>
+          <input id="notaValor" type="number" min="1" max="5" step="0.1" required placeholder="0.0">
+        </div>
+        <button type="submit" class="btn">Registrar nota</button>
+      </form>
+
+      <div class="toolbar">
+        <div class="field" style="min-width:180px;">
+          <label for="filtroMateriaNotas">Filtrar por materia</label>
+          <select id="filtroMateriaNotas"><option value="">Todas las materias</option></select>
+        </div>
+        <div class="field" style="min-width:150px;">
+          <label for="filtroPeriodoNotas">Filtrar por periodo</label>
+          <select id="filtroPeriodoNotas">
+            <option value="">Todos los periodos</option>
+            <option value="1">Periodo 1</option>
+            <option value="2">Periodo 2</option>
+            <option value="3">Periodo 3</option>
+            <option value="4">Periodo 4</option>
+          </select>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>Estudiante</th><th>Materia</th><th>Periodo</th><th class="num">Nota</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody id="tablaNotas"></tbody>
+      </table>
+    </section>
+
+    <!-- REPORTES -->
+    <section class="panel hidden" id="panel-reportes">
+      <h2>Reportes</h2>
+      <div class="reporte-cards" id="reporteCards"></div>
+
+      <h3 style="font-size:1.05em;">Promedio por estudiante</h3>
+      <table style="margin-bottom:1.8em;">
+        <thead><tr><th>Estudiante</th><th>Grupo</th><th class="num">Promedio</th><th>Estado</th></tr></thead>
+        <tbody id="tablaReporteEstudiantes"></tbody>
+      </table>
+
+      <h3 style="font-size:1.05em;">Promedio por materia</h3>
+      <table>
+        <thead><tr><th>Materia</th><th class="num">Promedio</th><th class="num">Aprobados</th><th class="num">Reprobados</th></tr></thead>
+        <tbody id="tablaReporteMaterias"></tbody>
+      </table>
+    </section>
+
+    <footer class="book-footer">
+      <span>Los datos se guardan solo en este navegador.</span>
+      <span>
+        <button id="btnExportar">Exportar respaldo (JSON)</button> ·
+        <button id="btnImportarTrigger">Importar respaldo</button> ·
+        <button id="btnLimpiarTodo" style="color:var(--red);">Borrar todos los datos</button>
+      </span>
+      <input type="file" id="fileImport" accept="application/json">
+    </footer>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const NOTA_MINIMA = 3.0;
+  const STORAGE_KEY = "libroDeNotas.v1";
+
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+
+  let data = cargarDatos();
+
+  function cargarDatos(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){ console.error("No se pudo leer el almacenamiento local:", e); }
+    return { instituto: "", estudiantes: [], materias: [], notas: [] };
+  }
+
+  function guardarDatos(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  // ---------- Fecha ----------
+  document.getElementById("fechaHoy").textContent = new Date().toLocaleDateString('es-CO', { year:'numeric', month:'long', day:'numeric' });
+
+  // ---------- Nombre del instituto ----------
+  const inputInstituto = document.getElementById("institutoNombre");
+  inputInstituto.value = data.instituto || "";
+  inputInstituto.addEventListener("input", () => {
+    data.instituto = inputInstituto.value;
+    guardarDatos();
+  });
+
+  // ---------- Tabs ----------
+  const tabButtons = document.querySelectorAll("nav.tabs button");
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll("section.panel").forEach(p => p.classList.add("hidden"));
+      document.getElementById("panel-" + btn.dataset.panel).classList.remove("hidden");
+      if(btn.dataset.panel === "reportes") renderReportes();
+    });
+  });
+
+  // ---------- Helpers de cálculo ----------
+  function notasDeEstudiante(estId){
+    return data.notas.filter(n => n.estudianteId === estId);
+  }
+  function notasDeMateria(matId){
+    return data.notas.filter(n => n.materiaId === matId);
+  }
+  function promedio(lista){
+    if(!lista.length) return null;
+    const suma = lista.reduce((acc,n) => acc + n.valor, 0);
+    return suma / lista.length;
+  }
+  function estadoTexto(prom){
+    if(prom === null) return { texto: "Sin notas", clase: "" };
+    return prom >= NOTA_MINIMA
+      ? { texto: "Aprobado", clase: "pill-pass" }
+      : { texto: "Reprobado", clase: "pill-fail" };
+  }
+  function nombreEstudiante(id){
+    const e = data.estudiantes.find(x => x.id === id);
+    return e ? e.nombre : "—";
+  }
+  function nombreMateria(id){
+    const m = data.materias.find(x => x.id === id);
+    return m ? m.nombre : "—";
+  }
+
+  // ================= ESTUDIANTES =================
+  const formEstudiante = document.getElementById("formEstudiante");
+  const tablaEstudiantes = document.getElementById("tablaEstudiantes");
+  const buscarEstudiante = document.getElementById("buscarEstudiante");
+
+  formEstudiante.addEventListener("submit", e => {
+    e.preventDefault();
+    const nombre = document.getElementById("estNombre").value.trim();
+    const grupo = document.getElementById("estGrupo").value.trim();
+    if(!nombre || !grupo) return;
+    data.estudiantes.push({ id: uid(), nombre, grupo });
+    guardarDatos();
+    formEstudiante.reset();
+    document.getElementById("estNombre").focus();
+    renderTodo();
+  });
+
+  buscarEstudiante.addEventListener("input", renderEstudiantes);
+
+  function renderEstudiantes(){
+    const filtro = buscarEstudiante.value.trim().toLowerCase();
+    const lista = data.estudiantes.filter(e =>
+      e.nombre.toLowerCase().includes(filtro) || e.grupo.toLowerCase().includes(filtro)
+    );
+    document.getElementById("conteoEstudiantes").textContent =
+      data.estudiantes.length + (data.estudiantes.length === 1 ? " estudiante" : " estudiantes");
+
+    if(!lista.length){
+      tablaEstudiantes.innerHTML = `<tr><td colspan="4"><div class="empty-state">${data.estudiantes.length ? "No hay estudiantes que coincidan con la búsqueda." : "Aún no hay estudiantes registrados. Agrega el primero arriba."}</div></td></tr>`;
+      return;
+    }
+
+    tablaEstudiantes.innerHTML = lista.map(est => {
+      const prom = promedio(notasDeEstudiante(est.id));
+      const promTxt = prom === null ? "—" : prom.toFixed(1);
+      return `
+        <tr>
+          <td data-label="Nombre">${escapeHtml(est.nombre)}</td>
+          <td data-label="Grupo">${escapeHtml(est.grupo)}</td>
+          <td data-label="Promedio" class="num">${promTxt}</td>
+          <td data-label="">
+            <div class="actions-cell">
+              <button class="btn-danger" data-eliminar-estudiante="${est.id}">Eliminar</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join("");
+
+    tablaEstudiantes.querySelectorAll("[data-eliminar-estudiante]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.eliminarEstudiante;
+        if(!confirm("¿Eliminar este estudiante y todas sus notas registradas?")) return;
+        data.estudiantes = data.estudiantes.filter(e => e.id !== id);
+        data.notas = data.notas.filter(n => n.estudianteId !== id);
+        guardarDatos();
+        renderTodo();
+      });
+    });
+  }
+
+  // ================= MATERIAS =================
+  const formMateria = document.getElementById("formMateria");
+  const tablaMaterias = document.getElementById("tablaMaterias");
+
+  formMateria.addEventListener("submit", e => {
+    e.preventDefault();
+    const nombre = document.getElementById("matNombre").value.trim();
+    const docente = document.getElementById("matDocente").value.trim();
+    if(!nombre) return;
+    data.materias.push({ id: uid(), nombre, docente });
+    guardarDatos();
+    formMateria.reset();
+    document.getElementById("matNombre").focus();
+    renderTodo();
+  });
+
+  function renderMaterias(){
+    if(!data.materias.length){
+      tablaMaterias.innerHTML = `<tr><td colspan="4"><div class="empty-state">Aún no hay materias registradas. Agrega la primera arriba.</div></td></tr>`;
+      return;
+    }
+    tablaMaterias.innerHTML = data.materias.map(mat => {
+      const prom = promedio(notasDeMateria(mat.id));
+      const promTxt = prom === null ? "—" : prom.toFixed(1);
+      return `
+        <tr>
+          <td data-label="Materia">${escapeHtml(mat.nombre)}</td>
+          <td data-label="Docente">${escapeHtml(mat.docente || "—")}</td>
+          <td data-label="Promedio" class="num">${promTxt}</td>
+          <td data-label="">
+            <div class="actions-cell">
+              <button class="btn-danger" data-eliminar-materia="${mat.id}">Eliminar</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join("");
+
+    tablaMaterias.querySelectorAll("[data-eliminar-materia]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.eliminarMateria;
+        if(!confirm("¿Eliminar esta materia y todas sus notas registradas?")) return;
+        data.materias = data.materias.filter(m => m.id !== id);
+        data.notas = data.notas.filter(n => n.materiaId !== id);
+        guardarDatos();
+        renderTodo();
+      });
+    });
+  }
+
+  // ================= NOTAS =================
+  const formNota = document.getElementById("formNota");
+  const tablaNotas = document.getElementById("tablaNotas");
+  const selEstudiante = document.getElementById("notaEstudiante");
+  const selMateria = document.getElementById("notaMateria");
+  const filtroMateriaNotas = document.getElementById("filtroMateriaNotas");
+  const filtroPeriodoNotas = document.getElementById("filtroPeriodoNotas");
+
+  function poblarSelects(){
+    const optsEst = data.estudiantes.map(e => `<option value="${e.id}">${escapeHtml(e.nombre)} (${escapeHtml(e.grupo)})</option>`).join("");
+    selEstudiante.innerHTML = data.estudiantes.length ? optsEst : `<option value="">Registra un estudiante primero</option>`;
+
+    const optsMat = data.materias.map(m => `<option value="${m.id}">${escapeHtml(m.nombre)}</option>`).join("");
+    selMateria.innerHTML = data.materias.length ? optsMat : `<option value="">Registra una materia primero</option>`;
+
+    filtroMateriaNotas.innerHTML = `<option value="">Todas las materias</option>` + optsMat;
+  }
+
+  formNota.addEventListener("submit", e => {
+    e.preventDefault();
+    const estudianteId = selEstudiante.value;
+    const materiaId = selMateria.value;
+    const periodo = document.getElementById("notaPeriodo").value;
+    const valor = parseFloat(document.getElementById("notaValor").value);
+
+    if(!estudianteId || !materiaId){
+      alert("Registra al menos un estudiante y una materia antes de anotar una nota.");
+      return;
+    }
+    if(isNaN(valor) || valor < 1 || valor > 5){
+      alert("La nota debe estar entre 1.0 y 5.0.");
+      return;
+    }
+
+    data.notas.push({ id: uid(), estudianteId, materiaId, periodo, valor });
+    guardarDatos();
+    document.getElementById("notaValor").value = "";
+    renderTodo();
+  });
+
+  filtroMateriaNotas.addEventListener("change", renderNotas);
+  filtroPeriodoNotas.addEventListener("change", renderNotas);
+
+  function renderNotas(){
+    let lista = [...data.notas];
+    if(filtroMateriaNotas.value) lista = lista.filter(n => n.materiaId === filtroMateriaNotas.value);
+    if(filtroPeriodoNotas.value) lista = lista.filter(n => n.periodo === filtroPeriodoNotas.value);
+    lista.sort((a,b) => nombreEstudiante(a.estudianteId).localeCompare(nombreEstudiante(b.estudianteId)));
+
+    if(!lista.length){
+      tablaNotas.innerHTML = `<tr><td colspan="6"><div class="empty-state">${data.notas.length ? "No hay notas que coincidan con el filtro." : "Aún no hay notas registradas."}</div></td></tr>`;
+      return;
+    }
+
+    tablaNotas.innerHTML = lista.map(n => {
+      const estado = n.valor >= NOTA_MINIMA ? { texto:"Aprobado", clase:"pill-pass" } : { texto:"Reprobado", clase:"pill-fail" };
+      return `
+        <tr>
+          <td data-label="Estudiante">${escapeHtml(nombreEstudiante(n.estudianteId))}</td>
+          <td data-label="Materia">${escapeHtml(nombreMateria(n.materiaId))}</td>
+          <td data-label="Periodo">Periodo ${n.periodo}</td>
+          <td data-label="Nota" class="num">${n.valor.toFixed(1)}</td>
+          <td data-label="Estado"><span class="pill ${estado.clase}">${estado.texto}</span></td>
+          <td data-label="">
+            <div class="actions-cell">
+              <button class="btn-danger" data-eliminar-nota="${n.id}">Eliminar</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join("");
+
+    tablaNotas.querySelectorAll("[data-eliminar-nota]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.eliminarNota;
+        data.notas = data.notas.filter(n => n.id !== id);
+        guardarDatos();
+        renderTodo();
+      });
+    });
+  }
+
+  // ================= REPORTES =================
+  function renderReportes(){
+    const totalEstudiantes = data.estudiantes.length;
+    const proms = data.estudiantes.map(e => promedio(notasDeEstudiante(e.id))).filter(p => p !== null);
+    const aprobados = proms.filter(p => p >= NOTA_MINIMA).length;
+    const reprobados = proms.length - aprobados;
+    const promGeneral = proms.length ? (proms.reduce((a,b)=>a+b,0)/proms.length) : null;
+
+    document.getElementById("reporteCards").innerHTML = `
+      <div class="stat-card">
+        <span class="stat-num">${totalEstudiantes}</span>
+        <span class="stat-label">Estudiantes registrados</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">${promGeneral === null ? "—" : promGeneral.toFixed(2)}</span>
+        <span class="stat-label">Promedio general del instituto</span>
+      </div>
+      <div class="stat-card pass">
+        <span class="stat-num">${aprobados}</span>
+        <span class="stat-label">Estudiantes aprobando</span>
+      </div>
+      <div class="stat-card fail">
+        <span class="stat-num">${reprobados}</span>
+        <span class="stat-label">Estudiantes reprobando</span>
+      </div>
+    `;
+
+    const tbodyEst = document.getElementById("tablaReporteEstudiantes");
+    if(!data.estudiantes.length){
+      tbodyEst.innerHTML = `<tr><td colspan="4"><div class="empty-state">No hay estudiantes registrados todavía.</div></td></tr>`;
+    } else {
+      tbodyEst.innerHTML = data.estudiantes.map(e => {
+        const prom = promedio(notasDeEstudiante(e.id));
+        const est = estadoTexto(prom);
+        return `<tr>
+          <td data-label="Estudiante">${escapeHtml(e.nombre)}</td>
+          <td data-label="Grupo">${escapeHtml(e.grupo)}</td>
+          <td data-label="Promedio" class="num">${prom === null ? "—" : prom.toFixed(2)}</td>
+          <td data-label="Estado">${est.clase ? `<span class="pill ${est.clase}">${est.texto}</span>` : est.texto}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    const tbodyMat = document.getElementById("tablaReporteMaterias");
+    if(!data.materias.length){
+      tbodyMat.innerHTML = `<tr><td colspan="4"><div class="empty-state">No hay materias registradas todavía.</div></td></tr>`;
+    } else {
+      tbodyMat.innerHTML = data.materias.map(m => {
+        const notasMat = notasDeMateria(m.id);
+        const prom = promedio(notasMat);
+        const aprob = notasMat.filter(n => n.valor >= NOTA_MINIMA).length;
+        const reprob = notasMat.length - aprob;
+        return `<tr>
+          <td data-label="Materia">${escapeHtml(m.nombre)}</td>
+          <td data-label="Promedio" class="num">${prom === null ? "—" : prom.toFixed(2)}</td>
+          <td data-label="Aprobados" class="num">${aprob}</td>
+          <td data-label="Reprobados" class="num">${reprob}</td>
+        </tr>`;
+      }).join("");
+    }
+  }
+
+  // ================= Exportar / Importar / Borrar ================
+  document.getElementById("btnExportar").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "libro-de-notas-respaldo.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  const fileImport = document.getElementById("fileImport");
+  document.getElementById("btnImportarTrigger").addEventListener("click", () => fileImport.click());
+  fileImport.addEventListener("change", () => {
+    const file = fileImport.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const importado = JSON.parse(reader.result);
+        if(!importado.estudiantes || !importado.materias || !importado.notas){
+          throw new Error("Formato no reconocido");
+        }
+        if(!confirm("Esto reemplazará los datos actuales con los del archivo importado. ¿Continuar?")) return;
+        data = importado;
+        guardarDatos();
+        inputInstituto.value = data.instituto || "";
+        renderTodo();
+      }catch(err){
+        alert("No se pudo importar el archivo: asegúrate de que sea un respaldo válido generado por esta app.");
+      }
+    };
+    reader.readAsText(file);
+    fileImport.value = "";
+  });
+
+  document.getElementById("btnLimpiarTodo").addEventListener("click", () => {
+    if(!confirm("Esto borrará TODOS los estudiantes, materias y notas de este navegador. ¿Continuar?")) return;
+    data = { instituto: data.instituto, estudiantes: [], materias: [], notas: [] };
+    guardarDatos();
+    renderTodo();
+  });
+
+  // ---------- Utilidad ----------
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[s]));
+  }
+
+  function renderTodo(){
+    poblarSelects();
+    renderEstudiantes();
+    renderMaterias();
+    renderNotas();
+    if(!document.getElementById("panel-reportes").classList.contains("hidden")) renderReportes();
+  }
+
+  renderTodo();
+})();
+</script>
+</body>
+</html>
